@@ -1,56 +1,60 @@
-# Daycraft Action Companion
+# AI Productivity Assistant
 
-START COPY:
+An AI-powered workplace productivity assistant: summarise long emails, pull action items out of raw meeting notes, and turn a messy task dump into a prioritised plan for the day.
 
+Built with [Lovable](https://lovable.dev).
 
+![AI Workplace Assistant](https://img.shields.io/badge/built%20with-Lovable-ff5a5f)
 
-Build an AI-Powered Workplace Productivity Assistant with React and Tailwind.
+## What it does
 
+| Tool | Input | Output |
+| --- | --- | --- |
+| **Email Summarizer** | A long email pasted into a textarea | A short bullet summary with tone and sentence count |
+| **Meeting Notes** | Raw notes from a meeting | A list of action items you can tick, edit, add or delete |
+| **Task Planner** | A brain-dump of everything on your plate | A prioritised task list (High / Medium / Low) you can reorder by dragging |
 
+Everything you see on screen is editable — summaries, action items and tasks can all be rewritten in place. Work is saved to the browser's `localStorage`, so it survives a reload.
 
-REQUIREMENTS:
+## How the "AI" works
 
-1. Layout: Dashboard on right, Sidebar on left with icons for 3 tools. Fully responsive, mobile-friendly, clean modern UI with cards.
+There is no API key and no network call. The assistant runs on a small set of local heuristics (keyword scoring and sentence ranking) wrapped in a `setTimeout` of 1.5 seconds to imitate thinking time. It is deliberately simple so the app can be run, forked and studied without any setup or cost.
 
-2. Feature 1: Email Summarizer - Input textarea for long email, Button "Summarize", Output box that is EDITABLE. Simulate AI summary.
+Swapping in a real model later means replacing the `mockSummary`, `mockActions` and `mockPlan` functions in `src/routes/index.tsx` with a call to a server function.
 
-3. Feature 2: Meeting Notes - Input for raw notes, Button "Extract Action Items", Output list of action items that are EDITABLE checkboxes.
+## Tech stack
 
-4. Feature 3: Task Planner - Input "Describe your day", Button "Plan My Day", Output prioritized task list that is EDITABLE and draggable.
+- [TanStack Start](https://tanstack.com/start) (React 19, TypeScript)
+- [Tailwind CSS v4](https://tailwindcss.com)
+- [shadcn/ui](https://ui.shadcn.com) components
+- [Vite](https://vitejs.dev)
+- [Vitest](https://vitest.dev) for tests
 
-5. All outputs must be editable by user (contentEditable or inputs).
+## Running it locally
 
-6. Add header: "AI Workplace Assistant - Built with Lovable"
-
-7. Footer disclaimer: "AI-generated content may be inaccurate. Please verify important information."
-
-8. Use mock AI - no real API key needed, use setTimeout to simulate thinking for 1.5 seconds.
-
-9. Save data to localStorage.
-
-
-
-Build it now as a single-page application.
-
-This project was built with [Lovable](https://lovable.dev).
-
-**Live app**: https://daycraft-action-companion.lovable.app
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/1df09da0-3437-4bee-aa9a-371d965b1d1b).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+You need Node.js 20+ (or [Bun](https://bun.sh)).
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+git clone https://github.com/mokadipromise27/AI-Productivity-Assistant.git
+cd AI-Productivity-Assistant
+npm install
 npm run dev
 ```
+
+Then open the address Vite prints (usually `http://localhost:8080`).
+
+Other scripts:
+
+```sh
+npm run build      # production build
+npm run test       # run the test suite
+npm run lint       # ESLint
+```
+
+## Disclaimer
+
+AI-generated content may be inaccurate. Please verify important information.
+
+## License
+
+MIT — do whatever you like with it.
