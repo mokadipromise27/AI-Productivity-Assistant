@@ -57,7 +57,7 @@ function ChatWindow({ threadId }: { threadId: string }) {
         <Button variant="ghost" size="icon-sm" title="Delete conversation" aria-label={`Delete conversation ${t.title}`} onClick={() => remove(t.id)}><Trash2 /></Button>
       </div>)}</div>
     </aside>
-    <div className="flex h-[650px] min-w-0 flex-col rounded-lg border bg-card shadow-card">
+    <div className="flex h-[min(650px,calc(100dvh-300px))] min-h-[350px] min-w-0 flex-col rounded-lg border bg-card shadow-card md:h-[650px]">
       <div className="flex items-center gap-3 border-b p-4"><BriefcaseBusiness className="h-5 w-5 text-primary" /><h2 className="text-lg font-semibold">Workplace assistant</h2><span className="ml-auto text-xs text-muted-foreground">Simulated AI</span></div>
       <Conversation><ConversationContent className="gap-5 p-4">
         {!messages.length && <div className="py-8"><h3 className="mb-5 text-xl">What are we working on today?</h3><div className="flex flex-wrap gap-2">{["Help me write a report", "Prioritize my tasks", "Draft a meeting agenda"].map((p) => <Button key={p} variant="outline" className="h-auto whitespace-normal py-2 text-left" onClick={() => void send(p)}>{p}</Button>)}</div></div>}
