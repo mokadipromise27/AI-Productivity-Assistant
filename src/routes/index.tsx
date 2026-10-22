@@ -1,12 +1,17 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState, type ReactNode } from "react";
-import { Mail, NotebookPen, CalendarCheck, Loader2, Sparkles, GripVertical, Trash2, Plus } from "lucide-react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState, type ReactNode } from "react";
+import { Mail, NotebookPen, CalendarCheck, Loader2, Sparkles, GripVertical, Trash2, Plus, Search, MessagesSquare, BriefcaseBusiness } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ResearchTool } from "@/components/research-tool";
+import { ChatTool } from "@/components/chat-tool";
+import { usePersisted } from "@/hooks/use-persisted";
+import { createThread, readThreads, saveThreads } from "@/lib/assistant-simulation";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "AI Workplace Assistant" },
-      { name: "description", content: "Summarize emails, extract action items and plan your day with an AI assistant." },
+      { name: "description", content: "Five workplace tools for emails, meeting notes, daily planning, simulated research and browser-saved AI chats." },
       { property: "og:title", content: "AI Workplace Assistant" },
       { property: "og:description", content: "Summarize emails, extract action items and plan your day." },
       { property: "og:type", content: "website" },
@@ -16,22 +21,11 @@ export const Route = createFileRoute("/")({
   component: App,
 });
 
-type Tool = "email" | "meeting" | "planner";
+type Tool = "email" | "meeting" | "planner" | "research" | "chat";
 type Item = { id: string; text: string; done: boolean; priority?: "High" | "Medium" | "Low" | undefined };
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 const think = () => new Promise((r) => setTimeout(r, 1500));
-
-function usePersisted<T>(key: string, initial: T) {
-  const [v, setV] = useState<T>(initial);
-  const [ready, setReady] = useState(false);
-  useEffect(() => {
-    try { const s = localStorage.getItem(key); if (s) setV(JSON.parse(s)); } catch {}
-    setReady(true);
-  }, [key]);
-  useEffect(() => { if (ready) localStorage.setItem(key, JSON.stringify(v)); }, [key, v, ready]);
-  return [v, setV] as const;
-}
 
 const sentences = (t: string) => t.replace(/\s+/g, " ").split(/(?<=[.!?])\s+|\n+/).map((s) => s.trim()).filter((s) => s.length > 3);
 
@@ -59,26 +53,38 @@ function mockPlan(text: string): Item[] {
 }
 
 const tools: { id: Tool; label: string; icon: typeof Mail }[] = [
-  { id: "email", label: "Email Summarizer", icon: Mail },
+  { id: "email", label: "Email Assistant", icon: Mail },
   { id: "meeting", label: "Meeting Notes", icon: NotebookPen },
   { id: "planner", label: "Task Planner", icon: CalendarCheck },
+  { id: "research", label: "Research Assistant", icon: Search },
+  { id: "chat", label: "AI Chatbot", icon: MessagesSquare },
 ];
 
-function App() {
+export function App({ threadId }: { threadId?: string }) {
   const [tool, setTool] = usePersisted<Tool>("wa-tool", "email");
+  const navigate = useNavigate();
+  const activeTool = threadId ? "chat" : tool === "chat" ? "email" : tool;
+  function selectTool(id: Tool) {
+    if (id === "chat") {
+      const threads = readThreads();
+      const current = threads[0] ?? createThread();
+      if (!threads.length) saveThreads([current]);
+      void navigate({ to: "/chat/$threadId", params: { threadId: current.id } });
+    } else { setTool(id); if (threadId) void navigate({ to: "/" }); }
+  }
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
       <aside className="order-last md:order-first sticky bottom-0 z-10 bg-sidebar text-sidebar-foreground md:static md:w-64 md:min-h-screen">
         <div className="hidden md:flex items-center gap-2 px-6 py-6 font-display text-xl">
-          <Sparkles className="h-5 w-5 text-accent" /> Assistant
+          <BriefcaseBusiness className="h-5 w-5 text-accent" /> Assistant
         </div>
         <nav className="flex md:flex-col justify-around md:justify-start gap-1 p-2 md:px-3">
           {tools.map((t) => (
-            <button key={t.id} onClick={() => setTool(t.id)} aria-label={t.label}
-              className={`flex flex-1 md:flex-none flex-col md:flex-row items-center gap-1 md:gap-3 rounded-lg px-3 py-2 md:py-3 text-xs md:text-sm transition-colors ${tool === t.id ? "bg-sidebar-accent text-accent" : "hover:bg-sidebar-accent/60"}`}>
+            <Button variant="ghost" key={t.id} onClick={() => selectTool(t.id)} aria-label={t.label} aria-current={activeTool === t.id ? "page" : undefined}
+              className={`flex h-auto min-w-0 flex-1 md:flex-none flex-col md:flex-row items-center md:justify-start gap-1 md:gap-3 rounded-lg px-1 md:px-3 py-2 md:py-3 text-[10px] md:text-sm whitespace-normal transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground ${activeTool === t.id ? "bg-sidebar-accent text-accent" : ""}`}>
               <t.icon className="h-5 w-5" />
               <span>{t.label}</span>
-            </button>
+            </Button>
           ))}
         </nav>
       </aside>
@@ -87,13 +93,15 @@ function App() {
         <header className="border-b bg-card px-4 py-4 md:px-8">
           <h1 className="text-xl md:text-2xl font-semibold">AI Workplace Assistant <span className="text-muted-foreground font-normal">- Built with Lovable</span></h1>
         </header>
-        <main className="flex-1 p-4 md:p-8 max-w-4xl w-full">
-          {tool === "email" && <EmailTool />}
-          {tool === "meeting" && <MeetingTool />}
-          {tool === "planner" && <PlannerTool />}
+        <main className="flex-1 p-4 md:p-8 max-w-6xl w-full">
+          {activeTool === "email" && <EmailTool />}
+          {activeTool === "meeting" && <MeetingTool />}
+          {activeTool === "planner" && <PlannerTool />}
+          {activeTool === "research" && <ResearchTool />}
+          {threadId && <ChatTool threadId={threadId} />}
         </main>
         <footer className="border-t px-4 py-4 md:px-8 text-xs text-muted-foreground">
-          AI-generated content may be inaccurate. Please verify important information.
+          AI outputs should be reviewed for accuracy. This assistant uses generative AI and may produce imperfect results. Always verify important information.
         </footer>
       </div>
     </div>
@@ -102,7 +110,7 @@ function App() {
 
 function Card({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="rounded-2xl border bg-card p-5 shadow-card">
+    <section className="rounded-lg border bg-card p-5 shadow-card">
       <h2 className="mb-3 text-lg font-semibold">{title}</h2>
       {children}
     </section>
