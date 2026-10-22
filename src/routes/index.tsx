@@ -17,7 +17,7 @@ export const Route = createFileRoute("/")({
 });
 
 type Tool = "email" | "meeting" | "planner";
-type Item = { id: string; text: string; done: boolean; priority?: "High" | "Medium" | "Low" };
+type Item = { id: string; text: string; done: boolean; priority?: "High" | "Medium" | "Low" | undefined };
 
 const uid = () => Math.random().toString(36).slice(2, 10);
 const think = () => new Promise((r) => setTimeout(r, 1500));
