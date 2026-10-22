@@ -142,7 +142,7 @@ function EmailTool() {
 function ItemList({ items, setItems, draggable }: { items: Item[]; setItems: (i: Item[]) => void; draggable?: boolean }) {
   const [drag, setDrag] = useState<number | null>(null);
   const update = (id: string, p: Partial<Item>) => setItems(items.map((i) => (i.id === id ? { ...i, ...p } : i)));
-  const move = (from: number, to: number) => { const n = [...items]; const [m] = n.splice(from, 1); n.splice(to, 0, m); setItems(n); };
+  const move = (from: number, to: number) => { const n = [...items]; const [m] = n.splice(from, 1); if (!m) return; n.splice(to, 0, m); setItems(n); };
   const badge = { High: "bg-destructive/15 text-destructive", Medium: "bg-accent/30 text-accent-foreground", Low: "bg-secondary text-secondary-foreground" };
   return (
     <ul className="grid gap-2">
